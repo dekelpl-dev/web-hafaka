@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hidabroot Production Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#040a16; --card:rgba(4,10,22,0.72);
+  --gold:#FFD580; --gold2:rgba(186,117,23,0.35); --gold3:rgba(186,117,23,0.2);
+  --purple:#AFA9EC; --purple2:rgba(83,74,183,0.35); --purple3:rgba(83,74,183,0.2);
+  --green:#4ADE80; --green2:rgba(39,174,96,0.32); --green3:rgba(39,174,96,0.18);
+  --teal:#0D9E8E; --red:rgba(255,80,80,0.25);
+  --border:rgba(255,255,255,0.07); --text:rgba(255,255,255,0.85);
+  --muted:rgba(255,255,255,0.38); --faint:rgba(255,255,255,0.04);
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Heebo',sans-serif;font-size:14px;}
+::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:4px;}
+
+/* Layout */
+#app{min-height:100vh;display:flex;flex-direction:column;}
+#main{max-width:1300px;margin:0 auto;padding:14px;flex:1;width:100%;}
+
+/* Header */
+header{background:rgba(4,8,18,0.88);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);padding:10px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;}
+.logo{font-size:18px;font-weight:900;color:var(--gold);letter-spacing:-.5px;}
+.logo span{color:var(--teal);}
+.sync{font-size:11px;color:var(--muted);padding:3px 10px;border:1px solid var(--border);border-radius:20px;display:none;}
+.sync.saving{color:var(--gold);border-color:rgba(255,213,128,.3);display:block;}
+.sync.saved{color:var(--green);border-color:var(--green2);display:block;}
+
+/* TabBar */
+#tabbar{display:flex;gap:4px;padding:8px 14px;background:rgba(4,8,18,.6);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--border);overflow-x:auto;}
+.tb{display:flex;align-items:center;gap:5px;padding:6px 14px;border:1px solid transparent;
+  border-radius:8px;cursor:pointer;font-family:'Heebo',sans-serif;font-size:12px;font-weight:600;
+  white-space:nowrap;background:transparent;color:var(--muted);transition:all .15s;}
+.tb:hover{background:var(--faint);color:var(--text);}
+.tb.active{background:rgba(255,213,128,.1);border-color:rgba(255,213,128,.28);color:var(--gold);}
+
+/* TabHero */
+.hero{margin-bottom:16px;padding:14px 16px;background:rgba(4,8,18,.55);
+  backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:16px;
+  display:flex;align-items:center;gap:12px;}
+.hero-icon{font-size:28px;line-height:1;}
+.hero-title{font-size:18px;font-weight:900;}
+.hero-sub{font-size:11px;color:var(--muted);margin-top:2px;font-weight:300;}
+
+/* Card headers */
+.ch{border-radius:12px 12px 0 0;padding:10px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;user-select:none;}
+.ch.nc{cursor:default;}
+.cb{background:var(--card);border-radius:0 0 12px 12px;overflow:hidden;}
+.gold-h{background:linear-gradient(135deg,rgba(186,117,23,.32),rgba(99,56,6,.22));border:1px solid var(--gold2);}
+.gold-b{border:1px solid var(--gold3);border-top:none;}
+.gold-t{color:var(--gold);font-weight:800;font-size:13px;}
+.purple-h{background:linear-gradient(135deg,rgba(83,74,183,.32),rgba(60,52,137,.22));border:1px solid var(--purple2);}
+.purple-b{border:1px solid var(--purple3);border-top:none;}
+.purple-t{color:var(--purple);font-weight:800;font-size:13px;}
+.green-h{background:linear-gradient(135deg,rgba(39,174,96,.22),rgba(30,132,73,.14));border:1px solid var(--green2);}
+.green-b{border:1px solid var(--green3);border-top:none;}
+.green-t{color:var(--green);font-weight:800;font-size:13px;}
+.teal-h{background:linear-gradient(135deg,rgba(13,158,142,.22),rgba(6,100,88,.14));border:1px solid rgba(13,158,142,.32);}
+.teal-b{border:1px solid rgba(13,158,142,.2);border-top:none;}
+.teal-t{color:var(--teal);font-weight:800;font-size:13px;}
+.red-h{background:linear-gradient(135deg,rgba(239,68,68,.22),rgba(185,28,28,.14));border:1px solid rgba(239,68,68,.32);}
+.red-b{border:1px solid rgba(239,68,68,.2);border-top:none;}
+.red-t{color:#F87171;font-weight:800;font-size:13px;}
+
+/* Rows */
+.cr{display:flex;align-items:center;gap:8px;padding:9px 14px;
+  border-bottom:1px solid rgba(255,255,255,.04);flex-wrap:wrap;}
+.cr:last-child{border-bottom:none;}
+.cr:hover{background:rgba(255,255,255,.018);}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:4px;cursor:pointer;border:1px solid;
+  border-radius:7px;font-family:'Heebo',sans-serif;font-weight:700;transition:all .14s;
+  white-space:nowrap;background:transparent;}
+.btn-ghost{border-color:rgba(255,255,255,.12);color:var(--muted);font-size:11px;padding:3px 8px;}
+.btn-ghost:hover{color:var(--text);}
+.btn-air{background:rgba(83,74,183,.28);border-color:rgba(83,74,183,.55);color:var(--purple);font-size:11px;padding:4px 10px;}
+.btn-air:hover{background:rgba(83,74,183,.45);}
+.btn-post{background:rgba(186,117,23,.25);border-color:rgba(186,117,23,.5);color:var(--gold);font-size:11px;padding:4px 10px;}
+.btn-post:hover{background:rgba(186,117,23,.4);}
+.btn-del{background:transparent;border:none;color:var(--red);font-size:12px;padding:2px 4px;cursor:pointer;}
+.btn-del:hover{color:#FF6B6B;}
+.btn-add{background:rgba(13,158,142,.15);border-color:rgba(13,158,142,.4);color:var(--teal);font-size:12px;padding:5px 14px;}
+.btn-add:hover{background:rgba(13,158,142,.28);}
+.btn-finish{background:rgba(74,222,128,.12);border-color:rgba(74,222,128,.35);color:var(--green);font-size:11px;padding:4px 10px;}
+.btn-finish:hover{background:rgba(74,222,128,.25);}
+
+/* Inputs */
+input[type=text],input[type=date],input[type=time],textarea,select{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);
+  border-radius:6px;color:var(--text);font-family:'Heebo',sans-serif;font-size:12px;
+  padding:5px 8px;outline:none;transition:border-color .15s;direction:rtl;}
+input:focus,textarea:focus,select:focus{border-color:rgba(255,213,128,.4);}
+input[type=date]{width:118px;} input[type=time]{width:68px;}
+
+/* Table */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{font-size:10px;font-weight:700;color:var(--muted);padding:6px 12px;
+  text-align:right;border-bottom:1px solid var(--border);white-space:nowrap;}
+.tbl td{padding:8px 12px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:rgba(255,255,255,.018);}
+.tbl td.c{text-align:center;}
+.edit-cell{cursor:pointer;} .edit-cell:hover{color:var(--gold);}
+.inline-ed{background:rgba(255,213,128,.08);border:1px solid rgba(255,213,128,.3) !important;color:var(--gold) !important;}
+
+/* Stage pipeline */
+.stage-row{display:flex;align-items:center;gap:10px;padding:6px 10px;
+  border-radius:8px;transition:background .1s;margin-bottom:4px;}
+.stage-row.done{background:rgba(255,213,128,.07);}
+.stage-row.locked{opacity:.25;pointer-events:none;}
+.stage-chk{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.2);
+  background:transparent;color:transparent;font-size:9px;font-weight:bold;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:all .15s;font-family:'Heebo',sans-serif;}
+.stage-chk.done{background:var(--gold);border-color:var(--gold);color:#000;}
+.stage-lbl{font-size:12px;flex:1;color:var(--muted);transition:color .15s;}
+.stage-lbl.done{color:var(--gold);}
+.sdots{display:flex;gap:3px;align-items:center;}
+.sdot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.1);transition:background .15s;}
+.sdot.done{background:var(--gold);}
+
+/* Status dot */
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dg{background:var(--gold);} .dp{background:var(--purple);} .dgr{background:var(--green);}
+.dgray{background:#666;} .ddim{background:rgba(255,255,255,.15);} .dyel{background:#FFD580;}
+.dt{background:var(--teal);}
+
+/* Badge */
+.badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;border:1px solid;}
+.ba{background:rgba(74,222,128,.15);border-color:rgba(74,222,128,.3);color:var(--green);}
+.bp{background:rgba(251,146,60,.15);border-color:rgba(251,146,60,.3);color:#FBA03C;}
+.bd{background:rgba(156,163,175,.15);border-color:rgba(156,163,175,.25);color:#9CA3AF;}
+.bl{background:rgba(83,74,183,.15);border-color:rgba(83,74,183,.3);color:var(--purple);}
+
+/* Producers */
+.pcard{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:16px;margin-bottom:12px;}
+.pav{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-weight:900;font-size:16px;flex-shrink:0;}
+.av0{background:rgba(13,158,142,.25);color:var(--teal);}
+.av1{background:rgba(83,74,183,.25);color:var(--purple);}
+.av2{background:rgba(186,117,23,.25);color:var(--gold);}
+
+/* Section box for bHafaka */
+.sec-box{margin-bottom:16px;}
+
+/* Pill tabs (sub-tabs inside בהפקה) */
+.ptabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.ptab{padding:5px 14px;border:1px solid var(--border);border-radius:20px;
+  cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);
+  background:transparent;font-family:'Heebo',sans-serif;transition:all .15s;}
+.ptab:hover{background:var(--faint);color:var(--text);}
+.ptab.active{background:rgba(255,213,128,.12);border-color:rgba(255,213,128,.35);color:var(--gold);}
+
+/* Arrow */
+.arr{font-size:10px;color:rgba(255,255,255,.25);margin-right:4px;}
+
+/* Empty */
+.empty{padding:32px;text-align:center;color:var(--muted);font-size:13px;font-style:italic;}
+
+/* Toast */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:rgba(4,10,22,.95);border:1px solid rgba(74,222,128,.4);
+  color:var(--green);padding:10px 20px;border-radius:10px;
+  font-size:13px;font-weight:600;transition:transform .3s;z-index:999;}
+#toast.show{transform:translateX(-50%) translateY(0);}
+
+/* Modal */
+#moverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+  backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;}
+#moverlay.open{display:flex;}
+#mbox{background:#070f1e;border:1px solid var(--border);border-radius:16px;
+  padding:20px;max-width:480px;width:calc(100% - 32px);max-height:80vh;overflow-y:auto;}
+.mclose{float:left;background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;}
+.mrow{margin-bottom:12px;}
+.mlbl{font-size:12px;color:var(--muted);margin-bottom:4px;}
+.mrow input,.mrow select{width:100%;padding:7px 10px;}
+
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.tab-content>*{animation:fi .18s ease;}
+
+/* Task status popup */
+#status-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);
+  backdrop-filter:blur(5px);z-index:300;align-items:center;justify-content:center;}
+#status-overlay.open{display:flex;}
+#status-box{background:#070f1e;border:1px solid var(--gold2);border-radius:18px;
+  padding:24px;width:420px;max-width:calc(100% - 32px);}
+#status-box h3{font-size:15px;font-weight:800;color:var(--gold);margin-bottom:4px;}
+#status-box .stask-name{font-size:12px;color:var(--muted);margin-bottom:14px;}
+#status-box textarea{width:100%;height:130px;resize:vertical;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,213,128,.25);
+  border-radius:10px;color:var(--text);font-family:'Heebo',sans-serif;
+  font-size:13px;padding:10px 12px;outline:none;line-height:1.6;}
+#status-box textarea:focus{border-color:rgba(255,213,128,.55);}
+.status-footer{display:flex;justify-content:flex-start;gap:8px;margin-top:12px;}
+.btn-save-status{background:rgba(255,213,128,.15);border:1px solid rgba(255,213,128,.4);
+  color:var(--gold);font-size:13px;font-weight:700;padding:7px 18px;
+  border-radius:8px;cursor:pointer;font-family:'Heebo',sans-serif;}
+.btn-save-status:hover{background:rgba(255,213,128,.28);}
+.btn-cancel-status{background:transparent;border:1px solid var(--border);
+  color:var(--muted);font-size:13px;font-weight:600;padding:7px 14px;
+  border-radius:8px;cursor:pointer;font-family:'Heebo',sans-serif;}
+.btn-cancel-status:hover{color:var(--text);}
+.status-preview{font-size:11px;color:rgba(255,213,128,.65);margin-top:3px;
+  white-space:pre-wrap;line-height:1.5;max-height:36px;overflow:hidden;
+  text-overflow:ellipsis;}
+
+/* Form upload button and indicator */
+.btn-form{background:rgba(13,158,142,.15);border-color:rgba(13,158,142,.4);
+  color:var(--teal);font-size:11px;padding:4px 10px;}
+.btn-form:hover{background:rgba(13,158,142,.28);}
+.btn-form.uploaded{background:rgba(74,222,128,.15);border-color:rgba(74,222,128,.4);
+  color:var(--green);}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">HIDABROOT <span>HUB</span></div>
+    <div id="sync" class="sync"></div>
+  </header>
+  <div id="tabbar"></div>
+  <div id="main"><div id="tab-content" class="tab-content"></div></div>
+</div>
+<div id="toast"></div>
+<div id="moverlay"><div id="mbox"></div></div>
+
+<!-- Task Status Popup -->
+<div id="status-overlay">
+  <div id="status-box">
+    <h3>📋 סטטוס תכנית</h3>
+    <div id="status-task-name" class="stask-name"></div>
+    <textarea id="status-textarea" placeholder="כתבי כאן עדכון התקדמות, הערות, שלב נוכחי..."></textarea>
+    <div class="status-footer">
+      <button class="btn-save-status" onclick="saveTaskStatus()">שמור</button>
+      <button class="btn-cancel-status" onclick="closeStatusPopup()">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden file input for form upload -->
+<input type="file" id="form-file-input" accept=".doc,.docx"
+  style="display:none" onchange="handleFormUpload(event)" />
+
+<script>
+// ═══════════════════════════════════════════
+// DEFAULT DATA
+// ═══════════════════════════════════════════
+const DEFAULT_DB = {
+  sections:[
+    {id:"s1",icon:"🎬",title:"תוכניות בהפקה",
+     cols:["name","filmed","remaining","notes"],
+     colLabels:["שם התוכנית","צולם","נשאר","הערות"],
+     centers:["filmed","remaining"],
+     def:{name:"תוכנית חדשה",filmed:"0",remaining:"0",notes:""},
+     rows:[
+       {id:1,name:"איך את עושה את זה",filmed:"13",remaining:"0",notes:""},
+       {id:2,name:"סיפור בשנים",filmed:"11",remaining:"0",notes:""},
+       {id:3,name:"פתוח",filmed:"12",remaining:"0",notes:""},
+       {id:4,name:"עונג שבת",filmed:"32",remaining:"18",notes:""},
+       {id:5,name:"סגולת אמת עונה 2",filmed:"12",remaining:"0",notes:""},
+       {id:6,name:"צדיקים",filmed:"12",remaining:"0",notes:""},
+       {id:7,name:"ארכיאולוגיה",filmed:"7",remaining:"קריינות לכולם",notes:""},
+       {id:8,name:"ברכת השחר - ניר קפטן",filmed:"7",remaining:"5",notes:""},
+       {id:9,name:"סיפור עירוני",filmed:"12",remaining:"-",notes:""},
+       {id:10,name:"בסלון של עמירן",filmed:"8",remaining:"-",notes:""},
+       {id:11,name:"סטורי",filmed:"4",remaining:"8",notes:""},
+       {id:12,name:"המפה הפנימית",filmed:"12",remaining:"0",notes:""},
+       {id:13,name:"מתגלגלים מצחוק",filmed:"0",remaining:"פיילוט",notes:""},
+       {id:14,name:"סול פוד",filmed:"12",remaining:"0",notes:""},
+     ]},
+    {id:"s2",icon:"📡",title:"תוכניות בלייב",
+     cols:["name","status","notes"],colLabels:["שם התוכנית","סטטוס","הערות"],
+     centers:[],def:{name:"תוכנית חדשה",status:"בלייב",notes:""},
+     rows:[
+       {id:15,name:"חישוב מסלול מחדש - הרב פנגר",status:"בוטל",notes:""},
+       {id:16,name:"חלום אדיר",status:"בלייב",notes:""},
+       {id:17,name:"הלכה למעשה",status:"בלייב",notes:""},
+       {id:18,name:"משיבת נפש",status:"בלייב",notes:""},
+       {id:19,name:"עם סגולה",status:"בלייב",notes:""},
+       {id:20,name:"סגולת אמת",status:"בלייב",notes:""},
+     ]},
+    {id:"s3",icon:"🕍",title:"רבנים - תוכניות נוספות",
+     cols:["name","episodes","notes"],colLabels:["שם התוכנית","פרקים","הערות"],
+     centers:["episodes"],def:{name:"תוכנית חדשה",episodes:"0",notes:""},
+     rows:[
+       {id:21,name:"להגיע רחוק",episodes:"8",notes:""},
+       {id:22,name:"מה תכלס",episodes:"8",notes:""},
+       {id:23,name:"בא נדבר על זה",episodes:"4",notes:""},
+       {id:24,name:"שבות ברשת",episodes:"7",notes:""},
+       {id:25,name:"מחפשים את עצמנו",episodes:"6",notes:""},
+       {id:26,name:"ועכשיו ברצינות",episodes:"8",notes:""},
+       {id:27,name:"יעקב חמו",episodes:"0",notes:""},
+       {id:28,name:"החלומות של צור עונה 2",episodes:"12",notes:""},
+       {id:29,name:"עולם הבריאה",episodes:"-",notes:""},
+       {id:30,name:"איכה בשוקא",episodes:"12",notes:""},
+       {id:31,name:"חברים בלייב",episodes:"-",notes:""},
+       {id:32,name:"בעקבות ההפטרה",episodes:"-",notes:""},
+       {id:33,name:"מסעות בזמן",episodes:"-",notes:""},
+       {id:34,name:"הידעת",episodes:"-",notes:""},
+     ]},
+    {id:"s4",icon:"🔮",title:"תכנון קדימה",
+     cols:["name","season","notes"],colLabels:["שם התוכנית","עונה","הערות"],
+     centers:[],def:{name:"תוכנית חדשה",season:"עונה 1",notes:""},
+     rows:[
+       {id:35,name:"סגולת אמת",season:"עונה 3",notes:""},
+       {id:36,name:"החלומות של צור",season:"עונה 3",notes:""},
+       {id:37,name:"סיפור בשנים",season:"עונה 2",notes:""},
+     ]},
+  ]
+};
+
+const DEFAULT_OPEN=[
+  {id:101,cat:"קרן קולנוע גליל",name:"צפת",details:"סרט קצר",status:"",notes:""},
+  {id:102,cat:"קרן קולנוע גליל",name:"לירן לוי עם חקלאי",details:"סרט קצר",status:"",notes:""},
+  {id:103,cat:"קרן קולנוע גליל",name:'רשב"י',details:"סרט קצר",status:"",notes:""},
+  {id:104,cat:"סרטי AI",name:"סרטי AI",details:"להפיק מול הקרן",status:"",notes:""},
+  {id:105,cat:"תכניות",name:"ברכות השחר",details:"לסיים 5 פרקים",status:"",notes:""},
+  {id:106,cat:"תכניות",name:"מושגים ביהדות",details:"",status:"",notes:""},
+  {id:107,cat:"תכניות",name:"איך את עושה את זה",details:"עונה 2",status:"",notes:""},
+  {id:108,cat:"תכניות",name:"פתוח קידס",details:"",status:"",notes:""},
+  {id:109,cat:"תכניות",name:"סטורי",details:"צולמו 4",status:"",notes:""},
+  {id:110,cat:"תכניות",name:'ארכיאולוגיה תנ"כית',details:"",status:"",notes:""},
+  {id:111,cat:"תכניות",name:"מתגלגלים מצחוק",details:"",status:"",notes:""},
+  {id:112,cat:"פודקאסטים",name:"הפנגרים",details:"",status:"",notes:""},
+  {id:113,cat:"פודקאסטים",name:"טיומקין ויקי אדמקר",details:"",status:"",notes:""},
+  {id:114,cat:"פודקאסטים",name:"דקל והרב גלעד",details:"",status:"",notes:""},
+  {id:115,cat:"פודקאסטים",name:"עידו קפטן",details:"",status:"",notes:""},
+  {id:116,cat:"פתוח",name:"פתוח - עונה נוספת",details:"עם אפרת ברזל",status:"",notes:""},
+];
+
+const DEFAULT_LIVE=[
+  {id:201,name:"יום העצמאות ה-78",dateHeb:'ה\' באייר תשפ"ו',dateGreg:"22 באפריל 2026",day:"רביעי",status:"לייב",notes:""},
+  {id:202,name:'ל"ג בעומר',dateHeb:'י"ח באייר תשפ"ו',dateGreg:"5 במאי 2026",day:"שלישי",status:"לייב",notes:""},
+];
+
+const DEFAULT_PRODUCERS=[
+  {id:"p0",name:"שיראל",role:"מפיקה",av:"ש",cls:"av0",tasks:[
+    {id:"t1",name:"עונג שבת",note:"בצילום פעיל",status:"active"},
+    {id:"t2",name:"ברכת השחר",note:"לסיים 5 פרקים",status:"pending"},
+    {id:"t3",name:"סטורי",note:"4 פרקים צולמו",status:"active"},
+  ]},
+  {id:"p1",name:"מנדי",role:"מפיק",av:"מ",cls:"av1",tasks:[
+    {id:"t4",name:"סול פוד",note:"הסתיים",status:"done"},
+    {id:"t5",name:"מתגלגלים מצחוק",note:"פיילוט בהכנה",status:"pending"},
+  ]},
+  {id:"p2",name:"דודי",role:"מפיק",av:"ד",cls:"av2",tasks:[
+    {id:"t6",name:"ארכיאולוגיה",note:"קריינות לכולם",status:"pending"},
+    {id:"t7",name:"המפה הפנימית",note:"הסתיים",status:"done"},
+  ]},
+];
+
+const STAGES=[
+  {key:"editing",      label:"עריכה ראשונית",     icon:"✂️"},
+  {key:"sound",        label:"נשלח לסאונד",        icon:"🔊"},
+  {key:"rabbis",       label:"בקרת רבנים",         icon:"📜"},
+  {key:"quality",      label:"בקרת איכות",         icon:"✅"},
+  {key:"transcription",label:"תמלול",              icon:"📝"},
+  {key:"ready",        label:"מוכן לשידור בתאריך:",icon:"📡"},
+];
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let nextId=600;
+function gid(){return nextId++;}
+
+function loadState(){
+  try{const s=localStorage.getItem("hidabroot-v3");if(s)return JSON.parse(s);}catch(e){}
+  return{
+    activeTab:0, subTab:0,
+    db:JSON.parse(JSON.stringify(DEFAULT_DB)),
+    open:JSON.parse(JSON.stringify(DEFAULT_OPEN)),
+    live:JSON.parse(JSON.stringify(DEFAULT_LIVE)),
+    producers:JSON.parse(JSON.stringify(DEFAULT_PRODUCERS)),
+    post:[],
+    onair:[],   // manual schedule: [{progName,episodes:[{epLabel,airDate,airTime}]}]
+    aired:[],
+    secCollapsed:{},
+    postCollapsed:{},
+    postEpCollapsed:{},
+    onairCollapsed:{},
+  };
+}
+
+const S=loadState();
+let saveTimer=null;
+
+function save(){
+  showSync("saving");clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{
+    localStorage.setItem("hidabroot-v3",JSON.stringify(S));
+    showSync("saved");setTimeout(()=>showSync(""),1500);
+  },500);
+}
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function showSync(st){
+  const el=document.getElementById("sync");
+  el.className="sync "+st; el.textContent=st==="saving"?"שומר...":"✓ נשמר";
+}
+let toastT;
+function toast(m){
+  const el=document.getElementById("toast");el.textContent=m;el.classList.add("show");
+  clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove("show"),2200);
+}
+function fmtDate(d,t){
+  if(!d)return""; const[y,m,day]=d.split("-");
+  return t?`${day}/${m}/${y} | ${t}`:`${day}/${m}/${y}`;
+}
+
+// Auto-move aired
+function checkAired(){
+  const now=new Date();
+  const move=[];
+  // from onair schedule
+  S.onair.forEach(prog=>{
+    const keep=[];
+    prog.episodes.forEach(ep=>{
+      if(!ep.airDate){keep.push(ep);return;}
+      const dt=new Date(ep.airDate+(ep.airTime?"T"+ep.airTime:"T00:00"));
+      if(dt<=now)move.push({progName:prog.progName,epLabel:ep.epLabel,airDate:ep.airDate,airTime:ep.airTime});
+      else keep.push(ep);
+    });
+    prog.episodes=keep;
+  });
+  S.onair=S.onair.filter(p=>p.episodes.length>0);
+  if(move.length){S.aired.push(...move);save();render();toast(`📺 ${move.length} פרק/ים עברו ל"שודר"`);}
+}
+
+// ═══════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════
+const TABS=[
+  {icon:"🎬",label:"בהפקה"},
+  {icon:"👥",label:"מפיקים"},
+  {icon:"📡",label:"שידורים חיים"},
+  {icon:"✂️",label:"פוסט"},
+  {icon:"📺",label:"עולה לשידור"},
+  {icon:"🌟",label:"שודר"},
+];
+
+function renderTabBar(){
+  document.getElementById("tabbar").innerHTML=TABS.map((t,i)=>
+    `<button class="tb${S.activeTab===i?" active":""}" onclick="setTab(${i})">${t.icon} ${t.label}</button>`
+  ).join("");
+}
+function setTab(i){S.activeTab=i;render();}
+
+function render(){
+  renderTabBar();
+  const c=document.getElementById("tab-content");
+  switch(S.activeTab){
+    case 0:c.innerHTML=renderBHafaka();break;
+    case 1:c.innerHTML=renderProducers();break;
+    case 2:c.innerHTML=renderLive();break;
+    case 3:c.innerHTML=renderPost();break;
+    case 4:c.innerHTML=renderOnAir();break;
+    case 5:c.innerHTML=renderAired();break;
+  }
+}
+
+function hero(icon,title,sub){
+  return`<div class="hero"><div class="hero-icon">${icon}</div><div>
+    <div class="hero-title">${title}</div><div class="hero-sub">${sub}</div></div></div>`;
+}
+
+// ═══════════════════════════════════════════
+// TAB 0 – בהפקה (merged: in-production + open)
+// ═══════════════════════════════════════════
+function renderBHafaka(){
+  const subTabs=["🎬 בהפקה פעילה","📋 הפקות פתוחות"];
+  let html=hero("🎬","בהפקה","כל ההפקות הפעילות והפתוחות");
+  // Pill sub-tabs
+  html+=`<div class="ptabs">${subTabs.map((l,i)=>
+    `<button class="ptab${S.subTab===i?" active":""}" onclick="setSubTab(${i})">${l}</button>`
+  ).join("")}</div>`;
+
+  if(S.subTab===0){
+    // Active productions – tables per section
+    S.db.sections.forEach((sec,si)=>{
+      const isOpen=S.secCollapsed["s"+si]!==true;
+      html+=`<div class="sec-box">
+        <div class="ch gold-h" onclick="toggleSec(${si})">
+          <div class="gold-t">${sec.icon} ${sec.title}</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:11px;color:var(--muted)">${sec.rows.length} תוכניות</span>
+            <span class="arr">${isOpen?"▲":"▼"}</span>
+          </div>
+        </div>`;
+      if(isOpen){
+        html+=`<div class="cb gold-b" style="overflow-x:auto">
+          <table class="tbl"><thead><tr>`;
+        sec.colLabels.forEach(l=>html+=`<th>${l}</th>`);
+        html+=`<th></th></tr></thead><tbody>`;
+        sec.rows.forEach((row,ri)=>{
+          html+=`<tr>`;
+          sec.cols.forEach(col=>{
+            const isName=col==="name";
+            const center=sec.centers.includes(col);
+            html+=`<td class="${center?"c":""} ${isName?"":"edit-cell"}"
+              ${isName?"":"onclick=\"editCell("+si+","+ri+",'"+col+"',this)\""}
+              style="${isName?"font-weight:600":""}">${row[col]||""}</td>`;
+          });
+          // Post button only on s1
+          if(sec.id==="s1"){
+            const hasForm=!!(row._formName||formStore[row.id]);
+            html+=`<td style="white-space:nowrap;display:flex;gap:4px;align-items:center">
+              <button class="btn btn-form ${hasForm?"uploaded":""}"
+                onclick="openFormUpload(${si},${row.id})"
+                title="${hasForm?'טופס הועלה: '+row._formName+' — לחץ להחלפה':'העלאת טופס וורד'}"
+              >${hasForm?"📎 "+row._formName.substring(0,12)+(row._formName.length>12?"…":""):"📄 טופס"}</button>
+              <button class="btn btn-post" onclick="moveToPost('${sec.id}',${row.id})">✂️ פוסט</button>
+            </td>`;
+          }else{
+            html+=`<td><button class="btn btn-del" onclick="delRow(${si},${ri})">✕</button></td>`;
+          }
+          html+=`</tr>`;
+        });
+        html+=`</tbody></table>
+          <div style="padding:8px 12px;border-top:1px solid var(--border)">
+            <button class="btn btn-add" onclick="addRow(${si})">+ הוסף שורה</button>
+          </div></div>`;
+      }
+      html+=`</div>`;
+    });
+  } else {
+    // Open productions
+    const cats={};
+    S.open.forEach((item,i)=>{if(!cats[item.cat])cats[item.cat]=[];cats[item.cat].push({...item,i});});
+    Object.entries(cats).forEach(([cat,items])=>{
+      html+=`<div class="sec-box">
+        <div class="ch teal-h nc">
+          <div class="teal-t">📋 ${cat}</div>
+          <span style="font-size:11px;color:rgba(13,158,142,.5)">${items.length} פריטים</span>
+        </div>
+        <div class="cb teal-b">`;
+      items.forEach(item=>{
+        html+=`<div class="cr">
+          <div class="dot dt" style="opacity:.6"></div>
+          <div style="flex:1">
+            <span style="font-weight:600;font-size:13px">${item.name}</span>
+            ${item.details?`<span style="font-size:11px;color:var(--muted);margin-right:8px">${item.details}</span>`:""}
+          </div>
+          <input type="text" value="${item.notes||""}" placeholder="הערה..."
+            style="width:160px" onchange="updateOpen(${item.i},'notes',this.value)" />
+          <button class="btn btn-del" onclick="delOpen(${item.i})">✕</button>
+        </div>`;
+      });
+      html+=`</div></div>`;
+    });
+    html+=`<button class="btn btn-add" onclick="addOpen()">+ הוסף פרויקט</button>`;
+  }
+  return html;
+}
+
+function setSubTab(i){S.subTab=i;save();render();}
+function toggleSec(si){S.secCollapsed["s"+si]=!S.secCollapsed["s"+si];save();render();}
+function editCell(si,ri,col,td){
+  if(td.querySelector("input"))return;
+  const val=S.db.sections[si].rows[ri][col]||"";
+  td.innerHTML=`<input class="inline-ed" value="${val}" style="width:100%;min-width:80px"
+    onblur="saveCell(${si},${ri},'${col}',this.value)"
+    onkeydown="if(event.key==='Enter'||event.key==='Escape')this.blur()" autofocus />`;
+  td.querySelector("input").select();
+}
+function saveCell(si,ri,col,val){S.db.sections[si].rows[ri][col]=val;save();render();}
+function addRow(si){const sec=S.db.sections[si];sec.rows.push({...sec.def,id:gid()});save();render();}
+function delRow(si,ri){S.db.sections[si].rows.splice(ri,1);save();render();}
+function updateOpen(i,key,val){S.open[i][key]=val;save();}
+function delOpen(i){S.open.splice(i,1);save();render();}
+function addOpen(){
+  const name=prompt("שם הפרויקט:");if(!name)return;
+  const cat=prompt("קטגוריה:","תכניות");if(!cat)return;
+  S.open.push({id:gid(),cat,name,details:"",status:"",notes:""});save();render();
+}
+
+function moveToPost(secId,rowId){
+  let sec,row,rowIdx=-1;
+  for(const s of S.db.sections){
+    if(s.id!==secId)continue; sec=s;
+    for(let j=0;j<s.rows.length;j++){
+      if(String(s.rows[j].id)===String(rowId)){row=s.rows[j];rowIdx=j;break;}
+    }break;
+  }
+  if(!row)return;
+
+  // ── Check: form must be uploaded ──
+  const hasForm=!!(row._formName||formStore[rowId]);
+  if(!hasForm){
+    const goUpload=confirm(`⚠️ טרם הועלה טופס לתוכנית "${row.name}".\n\nלא ניתן להעביר לפוסט ללא טופס.\n\nלחץ אישור כדי להעלות טופס עכשיו.`);
+    if(goUpload){
+      // Find si for this section
+      const si=S.db.sections.findIndex(s=>s.id===secId);
+      openFormUpload(si,rowId);
+    }
+    return;
+  }
+
+  const filmed=parseInt(row.filmed)||1;
+  const ans=prompt(`כמה פרקים לשלוח לפוסט?\nצולמו: ${filmed}`,String(filmed));
+  if(ans===null||ans==="")return;
+  const n=Math.max(1,parseInt(ans)||1);
+  const eps=[];
+  for(let e=1;e<=n;e++)
+    eps.push({num:e,progName:row.name,epLabel:row.name+" פרק "+e,
+              stages:Array(6).fill(false),airDate:"",airTime:""});
+  S.post.push({uid:String(row.id)+"_"+Date.now(),name:row.name,fromSec:secId,episodes:eps,
+               formName:row._formName||null});
+  sec.rows.splice(rowIdx,1);
+  S.activeTab=3;save();render();
+  toast(`✂️ ${n} פרקים של "${row.name}" נשלחו לפוסט`);
+}
+
+// ═══════════════════════════════════════════
+// TAB 1 – מפיקים
+// ═══════════════════════════════════════════
+const SL={active:"פעיל",pending:"ממתין",hold:"עצור",done:"הסתיים"};
+const SC={active:"ba",pending:"bp",done:"bd",hold:"bd"};
+
+function renderProducers(){
+  let html=hero("👥","מפיקים","צוות ההפקה עם סטטוס תוכניות בעבודה");
+  S.producers.forEach((p,pi)=>{
+    html+=`<div class="pcard">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div class="pav ${p.cls}">${p.av}</div>
+        <div>
+          <div style="font-weight:800;font-size:15px">${p.name}</div>
+          <div style="font-size:12px;color:var(--muted)">${p.role}</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">`;
+    p.tasks.forEach((t,ti)=>{
+      html+=`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;
+              background:var(--faint);border-radius:8px;border:1px solid var(--border)">
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:13px">${t.name}</div>
+          ${t.note?`<div style="font-size:11px;color:var(--muted);margin-top:1px">${t.note}</div>`:""}
+          ${t.statusNote?`<div class="status-preview">📋 ${t.statusNote}</div>`:""}
+        </div>
+        <button class="btn btn-ghost" onclick="openStatusPopup(${pi},${ti})" title="עדכן סטטוס תכנית">
+          📋 סטטוס
+        </button>
+        <span class="badge ${SC[t.status]||"bp"}" style="cursor:pointer"
+          title="לחץ לשינוי סטטוס" onclick="cycleTask(${pi},${ti})">${SL[t.status]||t.status}</span>
+        <button class="btn btn-finish" onclick="finishTask(${pi},${ti})" title="סיום הפקה">✓ סיום</button>
+        <button class="btn btn-del" onclick="delTask(${pi},${ti})">✕</button>
+      </div>`;
+    });
+    html+=`</div>
+      <button class="btn btn-add" style="margin-top:10px;font-size:11px;padding:4px 12px"
+        onclick="addTask(${pi})">+ משימה</button>
+    </div>`;
+  });
+  return html;
+}
+
+function cycleTask(pi,ti){
+  const c={active:"pending",pending:"done",done:"active"};
+  const t=S.producers[pi].tasks[ti];t.status=c[t.status]||"active";save();render();
+}
+function finishTask(pi,ti){
+  const t=S.producers[pi].tasks[ti];
+  if(!confirm(`לסיים את ההפקה "${t.name}"?\nהתוכנית תוסר מהרשימה.`))return;
+  S.producers[pi].tasks.splice(ti,1);save();render();
+  toast(`✓ "${t.name}" הסתיימה`);
+}
+function delTask(pi,ti){S.producers[pi].tasks.splice(ti,1);save();render();}
+function addTask(pi){
+  const name=prompt("שם המשימה:");if(!name)return;
+  const note=prompt("הערה (אופציונלי):","");
+  S.producers[pi].tasks.push({id:"t"+gid(),name,note:note||"",status:"active"});
+  save();render();
+}
+
+// ═══════════════════════════════════════════
+// TAB 2 – שידורים חיים
+// ═══════════════════════════════════════════
+function renderLive(){
+  let html=hero("📡","שידורים חיים","אירועי לייב מתוכננים");
+  html+=`<div class="sec-box">
+    <div class="ch red-h nc">
+      <div class="red-t">📡 שידורים חיים</div>
+      <span style="font-size:11px;color:rgba(248,113,113,.5)">${S.live.length} אירועים</span>
+    </div>
+    <div class="cb red-b">`;
+  if(!S.live.length)html+=`<div class="empty">אין אירועי לייב מתוכננים</div>`;
+  S.live.forEach((ev,i)=>{
+    html+=`<div class="cr">
+      <div class="dot" style="background:${ev.status==='מצולם מראש'?'#FBA03C':'#F87171'}"></div>
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:13px">${ev.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${ev.dateHeb}${ev.dateGreg?' | '+ev.dateGreg:''}${ev.day?' | '+ev.day:''}</div>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button onclick="setLiveType(${i},'לייב')"
+          style="padding:3px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;
+            font-family:'Heebo',sans-serif;transition:all .14s;
+            background:${ev.status==='לייב'?'rgba(239,68,68,.35)':'transparent'};
+            border:1px solid ${ev.status==='לייב'?'rgba(239,68,68,.6)':'rgba(255,255,255,.12)'};
+            color:${ev.status==='לייב'?'#F87171':'var(--muted)'}">📡 לייב</button>
+        <button onclick="setLiveType(${i},'מצולם מראש')"
+          style="padding:3px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;
+            font-family:'Heebo',sans-serif;transition:all .14s;
+            background:${ev.status==='מצולם מראש'?'rgba(251,146,60,.25)':'transparent'};
+            border:1px solid ${ev.status==='מצולם מראש'?'rgba(251,146,60,.5)':'rgba(255,255,255,.12)'};
+            color:${ev.status==='מצולם מראש'?'#FBA03C':'var(--muted)'}">🎬 מצולם מראש</button>
+      </div>
+      <input type="text" value="${ev.notes||""}" placeholder="הערות..."
+        style="width:130px" onchange="updLive(${i},'notes',this.value)" />
+      <button class="btn btn-del" onclick="delLive(${i})">✕</button>
+    </div>`;
+  });
+  html+=`</div></div>
+    <button class="btn btn-add" onclick="addLive()">+ הוסף אירוע לייב</button>`;
+  return html;
+}
+function updLive(i,k,v){S.live[i][k]=v;save();}
+function setLiveType(i,type){S.live[i].status=type;save();render();}
+function delLive(i){S.live.splice(i,1);save();render();}
+function addLive(){
+  const name=prompt("שם האירוע:");if(!name)return;
+  const date=prompt("תאריך עברי:","");
+  S.live.push({id:gid(),name,dateHeb:date||"",dateGreg:"",day:"",status:"לייב",notes:""});
+  save();render();
+}
+
+// ═══════════════════════════════════════════
+// TAB 3 – פוסט
+// ═══════════════════════════════════════════
+function renderPost(){
+  let html=hero("✂️","פוסט-פרודקשן","מעקב שלבי עריכה לכל פרק");
+  if(!S.post.length)return html+`<div class="empty">לחץ ✂️ פוסט בלשונית בהפקה</div>`;
+
+  S.post.forEach((prog,pi)=>{
+    const isOpen=S.postCollapsed[pi]!==true;
+    const done=prog.episodes.filter(ep=>(ep.stages||[])[5]&&ep.airDate).length;
+    html+=`<div class="sec-box">
+      <div class="ch gold-h" onclick="togPostProg(${pi})">
+        <div class="gold-t">✂️ ${prog.name}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:rgba(255,200,80,.55)">${done}/${prog.episodes.length} מוכן לשידור</span>
+          ${prog.formName?`<span style="font-size:11px;color:rgba(13,158,142,.7)" title="טופס מצורף">📎 ${prog.formName}</span>`:""}
+          <button class="btn btn-ghost" onclick="event.stopPropagation();returnPost(${pi})">↩ החזר</button>
+          <span class="arr">${isOpen?"▲":"▼"}</span>
+        </div>
+      </div>`;
+    if(isOpen){
+      html+=`<div class="cb gold-b">`;
+      prog.episodes.forEach((ep,ei)=>{
+        const epKey=`${pi}_${ei}`;
+        const isEpOpen=S.postEpCollapsed[epKey]!==true;
+        const stages=ep.stages||Array(6).fill(false);
+        const filled=stages.filter(Boolean).length;
+        const allDone=stages[5]&&ep.airDate;
+        const dotCls=allDone?"dgr":filled>0?"dyel":"ddim";
+        html+=`<div style="border-bottom:1px solid rgba(255,255,255,.04)">
+          <div class="cr" style="cursor:pointer;user-select:none" onclick="togPostEp('${epKey}')">
+            <div class="dot ${dotCls}"></div>
+            <div style="flex:1;font-weight:600;font-size:13px">${ep.epLabel}</div>
+            <div class="sdots">${stages.map(s=>`<div class="sdot ${s?"done":""}"></div>`).join("")}</div>
+            <span style="font-size:10px;color:var(--muted);width:28px;text-align:center">${filled}/6</span>
+            ${allDone?`<button class="btn btn-air" onclick="event.stopPropagation();sendEpAir(${pi},${ei})">📡 שלח לשידור</button>`:""}
+            <span class="arr">${isEpOpen?"▲":"▼"}</span>
+          </div>`;
+        if(isEpOpen){
+          html+=`<div style="padding:6px 14px 10px">`;
+          STAGES.forEach((stage,si)=>{
+            const isDone=stages[si];
+            const can=si===0||stages[si-1];
+            const isLast=si===5;
+            html+=`<div class="stage-row ${isDone?"done":""} ${!can?"locked":""}">
+              <button class="stage-chk ${isDone?"done":""}" onclick="togStage(${pi},${ei},${si})">✓</button>
+              <span style="font-size:13px">${stage.icon}</span>
+              <span class="stage-lbl ${isDone?"done":""}">${stage.label}</span>
+              ${isLast&&isDone?`
+                <input type="date" value="${ep.airDate||""}" onchange="updEpDate(${pi},${ei},'airDate',this.value)" />
+                <input type="time" value="${ep.airTime||""}" onchange="updEpDate(${pi},${ei},'airTime',this.value)" />
+              `:""}
+            </div>`;
+          });
+          html+=`</div>`;
+        }
+        html+=`</div>`;
+      });
+      html+=`</div>`;
+    }
+    html+=`</div>`;
+  });
+  return html;
+}
+function togPostProg(pi){S.postCollapsed[pi]=!S.postCollapsed[pi];save();render();}
+function togPostEp(k){S.postEpCollapsed[k]=!S.postEpCollapsed[k];save();render();}
+function returnPost(pi){
+  const prog=S.post[pi];
+  const sec=S.db.sections.find(s=>s.id===prog.fromSec)||S.db.sections[0];
+  sec.rows.push({id:prog.uid,name:prog.name,filmed:String(prog.episodes.length),remaining:"0",notes:""});
+  S.post.splice(pi,1);save();render();toast("↩ הוחזר להפקה");
+}
+function togStage(pi,ei,si){
+  const ep=S.post[pi].episodes[ei];
+  if(!ep.stages)ep.stages=Array(6).fill(false);
+  const v=!ep.stages[si]; ep.stages[si]=v;
+  if(!v){for(let x=si+1;x<6;x++)ep.stages[x]=false;ep.airDate="";ep.airTime="";}
+  save();render();
+}
+function updEpDate(pi,ei,k,v){S.post[pi].episodes[ei][k]=v;save();render();}
+function sendEpAir(pi,ei){
+  const prog=S.post[pi];const ep=prog.episodes[ei];
+  // Find or create program in onair
+  let oa=S.onair.find(p=>p.progName===ep.progName);
+  if(!oa){oa={progName:ep.progName,episodes:[]};S.onair.push(oa);}
+  oa.episodes.push({epLabel:ep.epLabel,airDate:ep.airDate,airTime:ep.airTime});
+  prog.episodes.splice(ei,1);
+  if(prog.episodes.length===0)S.post.splice(pi,1);
+  save();render();toast(`📡 "${ep.epLabel}" עלה לשידור`);
+}
+
+// ═══════════════════════════════════════════
+// TAB 4 – עולה לשידור (manual schedule)
+// ═══════════════════════════════════════════
+function renderOnAir(){
+  let html=hero("📺","עולה לשידור","תכנון תאריכי שידור לכל תוכנית");
+  // Button to add a new program manually
+  html+=`<div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn btn-add" onclick="addOnAirProg()">+ הוסף תוכנית</button>
+  </div>`;
+
+  if(!S.onair.length)return html+`<div class="empty">הוסיפי תוכנית ופרקים עם תאריכי שידור</div>`;
+
+  const now=new Date();
+  S.onair.forEach((prog,pi)=>{
+    const isOpen=S.onairCollapsed[pi]!==true;
+    // Sort eps by date
+    const sorted=[...prog.episodes].map((ep,i)=>({...ep,i})).sort((a,b)=>{
+      if(!a.airDate&&!b.airDate)return 0;if(!a.airDate)return 1;if(!b.airDate)return -1;
+      return(a.airDate+(a.airTime?"T"+a.airTime:"T00:00")).localeCompare(b.airDate+(b.airTime?"T"+b.airTime:"T00:00"));
+    });
+    const pastCount=sorted.filter(ep=>{
+      if(!ep.airDate)return false;
+      return new Date(ep.airDate+(ep.airTime?"T"+ep.airTime:"T00:00"))<=now;
+    }).length;
+
+    html+=`<div class="sec-box">
+      <div class="ch purple-h" onclick="togOnAir(${pi})">
+        <div class="purple-t">📺 ${prog.progName}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:rgba(175,169,236,.5)">${pastCount}/${prog.episodes.length} שודר</span>
+          <button class="btn btn-ghost" onclick="event.stopPropagation();addOnAirEp(${pi})">+ פרק</button>
+          <button class="btn btn-del" onclick="event.stopPropagation();delOnAirProg(${pi})">✕</button>
+          <span class="arr">${isOpen?"▲":"▼"}</span>
+        </div>
+      </div>`;
+    if(isOpen){
+      html+=`<div class="cb purple-b">`;
+      if(!prog.episodes.length)html+=`<div class="empty" style="padding:16px">לחץ "+ פרק" להוספת פרק</div>`;
+      sorted.forEach(ep=>{
+        const idx=ep.i;
+        let isPast=false;
+        if(ep.airDate){const dt=new Date(ep.airDate+(ep.airTime?"T"+ep.airTime:"T00:00"));isPast=dt<=now;}
+        html+=`<div class="cr" style="${isPast?"opacity:.45":""}">
+          <div class="dot ${isPast?"dgray":"dp"}"></div>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13px">${ep.epLabel}</div>
+            ${ep.airDate?`<div style="font-size:11px;margin-top:2px;color:${isPast?"#666":"rgba(175,169,236,.6)"}">
+              ${isPast?"✓ שודר ":"🕐 "}${fmtDate(ep.airDate,ep.airTime)}</div>`:""}
+          </div>
+          <input type="date" value="${ep.airDate||""}"
+            onchange="updOnAirEp(${pi},${idx},'airDate',this.value)" />
+          <input type="time" value="${ep.airTime||""}"
+            onchange="updOnAirEp(${pi},${idx},'airTime',this.value)" />
+          <button class="btn btn-del" onclick="delOnAirEp(${pi},${idx})">✕</button>
+        </div>`;
+      });
+      html+=`</div>`;
+    }
+    html+=`</div>`;
+  });
+  return html;
+}
+
+function togOnAir(pi){S.onairCollapsed[pi]=!S.onairCollapsed[pi];save();render();}
+
+function addOnAirProg(){
+  const name=prompt("שם התוכנית:");if(!name)return;
+  S.onair.push({progName:name,episodes:[]});save();render();
+}
+
+function addOnAirEp(pi){
+  const prog=S.onair[pi];
+  const epNum=prog.episodes.length+1;
+  const label=prog.progName+" פרק "+epNum;
+  const custom=prompt("תווית הפרק:",label);if(custom===null)return;
+  prog.episodes.push({epLabel:custom||label,airDate:"",airTime:""});
+  save();render();
+}
+
+function updOnAirEp(pi,ei,k,v){
+  S.onair[pi].episodes[ei][k]=v;save();render();
+}
+function delOnAirEp(pi,ei){S.onair[pi].episodes.splice(ei,1);save();render();}
+function delOnAirProg(pi){
+  if(!confirm(`למחוק את "${S.onair[pi].progName}" מהתכנון?`))return;
+  S.onair.splice(pi,1);save();render();
+}
+
+// ═══════════════════════════════════════════
+// TAB 5 – שודר
+// ═══════════════════════════════════════════
+function renderAired(){
+  let html=hero("🌟","שודר","פרקים שעלו לשידור");
+  if(!S.aired.length)return html+`<div class="empty">פרקים שעבר זמן השידור שלהם יועברו לכאן אוטומטית</div>`;
+  const groups={};
+  S.aired.forEach((ep,i)=>{
+    const k=ep.progName||ep.epLabel;
+    if(!groups[k])groups[k]=[];groups[k].push({...ep,i});
+  });
+  Object.entries(groups).forEach(([prog,eps])=>{
+    html+=`<div class="sec-box">
+      <div class="ch green-h nc">
+        <div class="green-t">🌟 ${prog}</div>
+        <span style="font-size:11px;color:rgba(74,222,128,.5)">${eps.length} פרקים שודרו</span>
+      </div>
+      <div class="cb green-b">`;
+    eps.forEach(ep=>{
+      html+=`<div class="cr">
+        <div class="dot dgr"></div>
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:13px;color:rgba(255,255,255,.75)">${ep.epLabel}</div>
+          ${ep.airDate?`<div style="font-size:11px;color:rgba(74,222,128,.5);margin-top:2px">✓ שודר ${fmtDate(ep.airDate,ep.airTime)}</div>`:""}
+        </div>
+        <button class="btn btn-del" onclick="delAired(${ep.i})">✕</button>
+      </div>`;
+    });
+    html+=`</div></div>`;
+  });
+  return html;
+}
+function delAired(i){S.aired.splice(i,1);save();render();}
+
+// ═══════════════════════════════════════════
+// TASK STATUS POPUP
+// ═══════════════════════════════════════════
+let statusTarget={pi:null,ti:null};
+
+function openStatusPopup(pi,ti){
+  const t=S.producers[pi].tasks[ti];
+  statusTarget={pi,ti};
+  document.getElementById("status-task-name").textContent=`תוכנית: ${t.name}`;
+  document.getElementById("status-textarea").value=t.statusNote||"";
+  document.getElementById("status-overlay").classList.add("open");
+  setTimeout(()=>document.getElementById("status-textarea").focus(),80);
+}
+function closeStatusPopup(){
+  document.getElementById("status-overlay").classList.remove("open");
+  statusTarget={pi:null,ti:null};
+}
+function saveTaskStatus(){
+  const{pi,ti}=statusTarget;
+  if(pi===null)return;
+  const val=document.getElementById("status-textarea").value.trim();
+  S.producers[pi].tasks[ti].statusNote=val;
+  save();render();closeStatusPopup();
+  toast("✓ סטטוס עודכן");
+}
+// Close on backdrop click
+document.getElementById("status-overlay").addEventListener("click",function(e){
+  if(e.target===this)closeStatusPopup();
+});
+
+// ═══════════════════════════════════════════
+// FORM UPLOAD (Word file per production row)
+// ═══════════════════════════════════════════
+// In-memory store: rowId → {name, data(base64)}
+const formStore={};
+let formUploadTarget=null; // {si, rowId}
+
+function openFormUpload(si,rowId){
+  formUploadTarget={si,rowId};
+  document.getElementById("form-file-input").value="";
+  document.getElementById("form-file-input").click();
+}
+function handleFormUpload(e){
+  const file=e.target.files[0];
+  if(!file||!formUploadTarget)return;
+  const{si,rowId}=formUploadTarget;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    formStore[rowId]={name:file.name,data:ev.target.result};
+    // Mark row as having a form
+    const sec=S.db.sections[si];
+    const row=sec.rows.find(r=>String(r.id)===String(rowId));
+    if(row){row._formName=file.name;}
+    save();render();
+    toast(`📎 "${file.name}" הועלה בהצלחה`);
+  };
+  reader.readAsDataURL(file);
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+checkAired();
+setInterval(checkAired,60000);
+render();
+</script>
+</body>
+</html>
